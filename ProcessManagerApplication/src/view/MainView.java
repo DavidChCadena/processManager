@@ -1,6 +1,9 @@
 package view;
 
+import controller.MainController;
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class MainView extends JFrame {
@@ -9,60 +12,66 @@ public class MainView extends JFrame {
     private JLabel lblInfo, lblTime;
     private JButton btnExit;
     private JPanel panelContent;
-    private GridBagConstraints constraints;
+    private DefaultTableModel dflTblProcess, defTblQueue;
 
-    public MainView() throws HeadlessException {
+    //Controlador action listener
+    public MainView(MainController controller) throws HeadlessException {
         super("Process Manager");
         this.setLayout(new GridLayout(1, 1));
         this.setSize(800, 600);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         panelContent = new JPanel();
-        panelContent.setLayout(new GridBagLayout());
-        constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.weightx = 1.5;
-        init();
+        panelContent.setLayout(new BorderLayout());
+        panelContent.setBorder(BorderFactory.createEmptyBorder(10,20,10,20));
+        init(controller);
         this.add(panelContent);
         this.setVisible(true);
     }
 
-    public void init() {
+    //Controlador action listener
+    public void init(MainController controller) {
+        JPanel panelNorth = new JPanel(new GridLayout(1,2));
+
         lblInfo = new JLabel("Administrador de procesos");
         lblInfo.setBorder(BorderFactory.createTitledBorder("Información"));
         lblInfo.setHorizontalAlignment(SwingConstants.CENTER);
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        panelContent.add(lblInfo, constraints);
-
         lblTime = new JLabel("Tiempo: 00:00");
         lblTime.setBorder(BorderFactory.createTitledBorder("Tiempo de simulación"));
         lblTime.setHorizontalAlignment(SwingConstants.CENTER);
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.insets = new Insets(0,20,0,20);
-        constraints.gridx = 2;
-        constraints.gridy = 0;
-        constraints.weightx = 2;
-        panelContent.add(lblTime, constraints);
+
+        panelNorth.add(lblInfo);
+        panelNorth.add(lblTime);
 
         addData();
-        JScrollPane scrollProcess = new JScrollPane(tblProcess);
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridx = 1;
-        constraints.gridy = 1;
-        constraints.gridheight = 2;
-        constraints.gridwidth = 2;
-        panelContent.add(scrollProcess, constraints);
 
-        JScrollPane scrollQueue = new JScrollPane(tblQueue);
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridx = 0;
-        constraints.gridy = 1;
-        constraints.gridheight = 3;
-        constraints.gridwidth = 1;
-        panelContent.add(scrollQueue, constraints);
+        JPanel panelWest = new JPanel();
+        JPanel panelCenter = new JPanel();
+        panelCenter.setLayout(new BoxLayout(panelCenter, BoxLayout.Y_AXIS));
+        panelWest.setLayout(new BoxLayout(panelWest, BoxLayout.Y_AXIS));
 
+        JScrollPane scrollProcess = new JScrollPane(tblProcess, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        JScrollPane scrollQueue = new JScrollPane(tblQueue, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollQueue.setPreferredSize(new Dimension(120,80));
+        panelWest.setBorder(BorderFactory.createEmptyBorder(0,10,0,10));
+
+        panelCenter.add(scrollProcess);
+        panelWest.add(scrollQueue);
+
+        JPanel panelSouth = new JPanel();
+        panelSouth.setLayout(new FlowLayout());
+
+        btnExit = new JButton("Salir");
+        btnExit.addActionListener(controller);
+        btnExit.setActionCommand("exit");
+        panelSouth.add(btnExit);
+
+        panelContent.add(panelNorth, BorderLayout.NORTH);
+        panelContent.add(panelWest, BorderLayout.WEST);
+        panelContent.add(panelCenter, BorderLayout.CENTER);
+        panelContent.add(panelSouth, BorderLayout.SOUTH);
     }
 
     private void addData() {
@@ -89,7 +98,9 @@ public class MainView extends JFrame {
                 {19, "Joe_19", 80, 70, 60, 210},
                 {20, "Joe_20", 80, 70, 60, 210}
         };
-        tblProcess = new JTable(rowData, columnNames);
+        dflTblProcess = new DefaultTableModel(rowData, columnNames);
+        tblProcess = new JTable(dflTblProcess);
+
 
         String[] columnNames2 = {"Procesos en cola"};
         Object[][] rowData2 = {
@@ -101,14 +112,20 @@ public class MainView extends JFrame {
                 {"Proceso 6"},
                 {"Proceso 7"},
                 {"Proceso 8"},
-
         };
-
-        tblQueue = new JTable(rowData2, columnNames2);
+        defTblQueue = new DefaultTableModel(rowData2, columnNames2);
+        tblQueue = new JTable(defTblQueue);
     }
 
+    public DefaultTableModel getDflTblProcess() {
+        return dflTblProcess;
+    }
+
+    public DefaultTableModel getDefTblQueue() {
+        return defTblQueue;
+    }
 
     public static void main(String Args[]) {
-        new MainView();
+        new MainView(null);
     }
 }
